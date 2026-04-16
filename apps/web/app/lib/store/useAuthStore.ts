@@ -1,4 +1,3 @@
-import "dotenv/config"
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import axios from 'axios';
@@ -21,17 +20,20 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
-      token: null, // Don't call localStorage here; persist handles it
+      token: null, // Let persist handle loading this from storage
       isInitialized: false,
 
       checkAuth: async () => {
         const token = get().token;
+        console.log(token);
         if (!token) {
           set({ user: null, isInitialized: true });
           return;
         }
         try {
-          const res = await axios.get(`${process.env.HTTP_URL}/isloggedin`, {
+          // Use NEXT_PUBLIC_ prefix for client-side access
+          const apiUrl = process.env.NEXT_PUBLIC_HTTP_URL;
+          const res = await axios.get(`${apiUrl}/isloggedin`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           set({ user: res.data.user, isInitialized: true });
@@ -51,7 +53,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
-      // Optional: Only save user and token, skip isInitialized
+      // Only save user/token; isInitialized should reset to false on refresh
       partialize: (state) => ({ user: state.user, token: state.token }),
     }
   )

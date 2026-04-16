@@ -5,10 +5,13 @@ import { Roomschema, Signinschema ,Signupschema} from "@repo/zod/index";
 import { middleware } from "./middleware";
 import { prisma } from "@repo/db";
 import { JWT_SECRET } from "@repo/common-jwtsecret/index";
+import cors from "cors"
 console.log(process.env.DATABASE_URL)
 
 
 const app=express();
+app.use(cors({origin:"*"}));
+app.use(express.json());
 app.use(express.json());
 app.get("/",async (req,res)=>{
      const user=await prisma.user.findMany({});
@@ -162,6 +165,7 @@ app.get('/findroomid/:roomname',async (req,res)=>{
 })
 app.get('/isloggedin',(req,res)=>{
         const token=req.headers["authorization"]?.split(" ")[1]||"";
+        console.log(token);
         const decode=jwt.verify(token,JWT_SECRET);
         if(!decode||!(decode as unknown as JwtPayload).userID||!(decode as unknown as JwtPayload).username)
         {

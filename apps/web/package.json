@@ -14,7 +14,7 @@
     "@repo/db": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tailwindcss/postcss": "^4.2.0",
-    "axios": "^1.13.5",
+    "axios": "1.13.5",
     "lucide-react": "^0.574.0",
     "next": "16.1.5",
     "postcss": "^8.5.6",

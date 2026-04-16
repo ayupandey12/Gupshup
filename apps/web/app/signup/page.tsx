@@ -3,7 +3,10 @@ import { Forminput } from "../components/Forminput"
 
 const signup=()=>{
     return (
-        <Forminput type="signup"/>
+        <div>
+            <Forminput type="signup"/>
+        </div>
+      
     )
 }
 export default signup

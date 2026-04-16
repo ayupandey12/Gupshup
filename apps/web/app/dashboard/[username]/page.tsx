@@ -1,4 +1,5 @@
 "use client"
+import "dotenv/config"
 import { useRouter } from "next/navigation";
 import { useAuthHydrated } from "../../lib/store/useAuthhydration";
 import { useEffect } from "react";
@@ -9,7 +10,7 @@ const dashboard=()=>{
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth,user]);
+  }, [checkAuth]);
 
   if (!isInitialized) return <div>Loading...</div>;
 
