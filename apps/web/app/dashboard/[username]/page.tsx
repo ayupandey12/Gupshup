@@ -13,7 +13,7 @@ const dashboard=()=>{
   }, [checkAuth]);
 
   if (!isInitialized) return <div>Loading...</div>;
-
+  console.log(user);
   if (!user) {
     router.push('/signin');
     return null;

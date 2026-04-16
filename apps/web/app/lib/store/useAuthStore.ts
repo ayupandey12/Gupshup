@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
           const res = await axios.get(`${apiUrl}/isloggedin`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          set({ user: res.data.user, isInitialized: true });
+          set({ user: res.data.decode, isInitialized: true });
         } catch (err) {
           get().logout();
         }

@@ -167,7 +167,8 @@ app.get('/isloggedin',(req,res)=>{
         const token=req.headers["authorization"]?.split(" ")[1]||"";
         console.log(token);
         const decode=jwt.verify(token,JWT_SECRET);
-        if(!decode||!(decode as unknown as JwtPayload).userID||!(decode as unknown as JwtPayload).username)
+        console.log(decode);
+        if(!decode||!(decode as unknown as JwtPayload).userId||!(decode as unknown as JwtPayload).username)
         {
             res.status(411).json({
                 mess:"unauthorized user!"
