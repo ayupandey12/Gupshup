@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom"
 import { Inputbox } from "./Forminput"
 import { Formsubmitaction } from "../lib/actions/Formsubmit"
 import { useAuthHydrated } from "../lib/store/useAuthhydration"
+import { redirect } from "next/navigation"
 
 //useformstatus work for parent so make submitbutton as component of formbutton
 const SubmitButton = ({ type }: { type: "signin" | "signup" }) => {
@@ -53,6 +54,7 @@ export const Formbutton = ({ type }: { type: "signin" | "signup" }) => {
          {  
             seterror(false);
             login(user,token);
+            redirect("/dashboard/"+user.username);
          }
            setmes(mess)
             return;
