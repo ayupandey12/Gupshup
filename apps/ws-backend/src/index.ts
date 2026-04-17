@@ -44,6 +44,15 @@ wss.on("connection",async(ws,request)=>{
     roomId:[],
     userId:userId
   })
+    
+  ws.on("close", () => {
+    const index = user.findIndex(u => u.ws === ws);
+    if (index !== -1) {
+      user.splice(index, 1);
+      console.log("User disconnected and removed from global state");
+    }
+  });
+
   ws.on("message",async(data)=>{ //comming data is in string form 
     const parsedata=JSON.parse(data as unknown as string)
     if(parsedata.type==="join_room")
@@ -51,11 +60,13 @@ wss.on("connection",async(ws,request)=>{
          const user2=user.find(x=>x.ws===ws)
          if(!user2) return ;
          user2.roomId.push(parsedata.roomId)
+          console.log("user join room",user2.roomId)
       }  
     if(parsedata.type==="leave_room")
       { const user2=user.find(x=>x.ws===ws)
         if(!user2) return ;
         user2.roomId=user2.roomId.filter(x=>x!==parsedata.roomId)
+        console.log("user leave room",user2.roomId)
       } 
     if(parsedata.type==="chat")
       {
@@ -76,6 +87,7 @@ wss.on("connection",async(ws,request)=>{
               message:message,
               roomId:roomId
             }));
+            console.log("message sent to user",u.userId)
           }
          })
       }   

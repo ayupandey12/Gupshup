@@ -9,8 +9,17 @@ const RoomWithId = () => {
     const roomId = Number(params.roomid); 
     
     const socketRef = useRef<WebSocket | null>(null);
+    const scrollRef = useRef<HTMLDivElement | null>(null); // For auto-scroll
+
     const [messages, setMessages] = useState<any[]>([]);
     const [sendmessage, setsendmessage] = useState<string>("");
+
+    // 1. Auto-scroll to bottom whenever messages update
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     useEffect(() => {
         if (!token || isNaN(roomId)) return;
@@ -22,7 +31,7 @@ const RoomWithId = () => {
             console.log("ws connected");
             ws.send(JSON.stringify({
                 type: "join_room",
-                roomId: roomId // Sending as number
+                roomId: roomId 
             }));
         };
 
@@ -64,10 +73,15 @@ const RoomWithId = () => {
     };
 
     return (
-        <div className="p-4 max-w-2xl mx-auto">
+        <div className="p-4 max-w-2xl mx-auto flex flex-col h-screen">
             <h1 className="text-xl font-bold border-b pb-2">Room: {roomId}</h1>
             
-            <div className="mt-4 border p-4 h-96 overflow-y-auto bg-gray-50 rounded">
+            {/* Scroll Container */}
+            <div 
+                ref={scrollRef}
+                className="flex-1 mt-4 border p-4 overflow-y-auto bg-gray-50 rounded"
+            >
+                {messages.length === 0 && <p className="text-gray-400 text-center">No messages yet...</p>}
                 {messages.map((msg, index) => (
                     <div key={index} className="mb-2 p-2 bg-white rounded shadow-sm">
                         <span className="font-bold text-blue-600">User: </span>
@@ -82,9 +96,9 @@ const RoomWithId = () => {
                     value={sendmessage}
                     onChange={(e) => setsendmessage(e.target.value)}
                     placeholder="Type message..."
-                    className="flex-1 border p-2 rounded"
+                    className="flex-1 border p-2 rounded focus:outline-blue-500"
                 />
-                <button type="submit" className="bg-black text-white px-6 py-2 rounded">
+                <button type="submit" className="bg-black text-white px-6 py-2 rounded font-bold hover:bg-gray-800 transition">
                     Send
                 </button>
             </form>
