@@ -9,6 +9,7 @@ import { Pre50 } from "../../components/Pre50";
 const RoomWithId = () => {
   const token = useAuthStore((state) => state.token);
   const username = useAuthStore((state) => state.user?.username);
+  const logout = useAuthStore((state) => state.logout);
   const params = useParams();
   const router = useRouter();
   const roomId = Number(params.roomid);
@@ -86,11 +87,23 @@ const RoomWithId = () => {
     e.preventDefault();
     const socket = socketRef.current;
     if (socket?.readyState === WebSocket.OPEN && sendmessage.trim() !== "") {
-      socket.send(JSON.stringify({
+      const outboundMessage = {
         type: "chat",
         roomId: roomId,
         message: sendmessage,
-      }));
+      };
+      socket.send(JSON.stringify(outboundMessage));
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "chat",
+          roomId,
+          message: sendmessage,
+          userId: username,
+          username: username,
+          pending: true,
+        },
+      ]);
       setsendmessage("");
     }
   };
@@ -110,17 +123,28 @@ const RoomWithId = () => {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6">
       <div className="mx-auto flex h-[calc(100vh-3rem)] max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_35px_90px_rgba(15,23,42,0.08)]">
-        <header className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 px-6 py-5 text-white">
+        <header className="flex flex-col gap-4 border-b border-slate-200 bg-[#f8f3eb] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Chat room</p>
-            <h1 className="mt-2 text-2xl font-semibold">Room #{roomId}</h1>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Classic chat room</p>
+            <h1 className="mt-2 text-2xl font-semibold text-slate-950">Room #{roomId}</h1>
           </div>
-          <button
-            onClick={() => router.push(`/dashboard/${username}`)}
-            className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium transition hover:bg-white/20"
-          >
-            Back to dashboard
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => router.push('/')}
+              className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+            >
+              Home
+            </button>
+            <button
+              onClick={() => {
+                logout();
+                router.push('/signin');
+              }}
+              className="rounded-full border border-amber-400 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 transition hover:bg-amber-100"
+            >
+              Logout
+            </button>
+          </div>
         </header>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
