@@ -60,47 +60,66 @@ wss.on("connection",async(ws,request)=>{
     }
   });
 
-  ws.on("message",async(data)=>{ //comming data is in string form 
-    const parsedata=JSON.parse(data as unknown as string)
-    if(parsedata.type==="join_room")
-      {
-         const user2=user.find(x=>x.ws===ws)
-         if(!user2) return ;
-         user2.roomId.push(parsedata.roomId)
-          console.log("user join room",user2.roomId)
-      }  
-    if(parsedata.type==="leave_room")
-      { const user2=user.find(x=>x.ws===ws)
-        if(!user2) return ;
-        user2.roomId=user2.roomId.filter(x=>x!==parsedata.roomId)
-        console.log("user leave room",user2.roomId)
-      } 
-    if(parsedata.type==="chat")
-      {
-         const roomId =parsedata.roomId;
-         const message=parsedata.message;
-         const user2 = user.find(x => x.ws === ws);
-         if (!user2) return;
-         await prisma.messages.create({ //idealy use queue
-          data:{
-            message:message,
-            roomId:roomId,
-            userId:user2.userId
-          }
-         })
-         user.forEach(u=>{
-          if(u.roomId.includes(roomId))
-          {
-            u.ws.send(JSON.stringify({ //you can send  data in string form
-              type:"chat",
-              message:message,
-              roomId:roomId,
-              userId: user2.userId,
-              username: user2.username
-            }));
-            console.log("message sent to user",u.userId)
-          }
-         })
-      }   
-  })
+  ws.on("message", async (data) => {
+    const raw = typeof data === "string" ? data : data.toString();
+    const parsedata = JSON.parse(raw);
+    const roomId = Number(parsedata.roomId);
+    if (!Number.isInteger(roomId)) {
+      return;
+    }
+
+    const currentUser = user.find((x) => x.ws === ws);
+    if (!currentUser) {
+      return;
+    }
+
+    if (parsedata.type === "join_room") {
+      if (!currentUser.roomId.includes(roomId)) {
+        currentUser.roomId.push(roomId);
+      }
+      console.log("user joined room", currentUser.userId, roomId);
+      return;
+    }
+
+    if (parsedata.type === "leave_room") {
+      currentUser.roomId = currentUser.roomId.filter((x) => x !== roomId);
+      console.log("user left room", currentUser.userId, roomId);
+      return;
+    }
+
+    if (parsedata.type === "chat") {
+      const message = String(parsedata.message ?? "");
+      if (!message.trim()) {
+        return;
+      }
+
+      if (!currentUser.roomId.includes(roomId)) {
+        currentUser.roomId.push(roomId);
+        console.log("auto-joined user to room on chat", currentUser.userId, roomId);
+      }
+
+      await prisma.messages.create({
+        data: {
+          message,
+          roomId,
+          userId: currentUser.userId,
+        },
+      });
+
+      user.forEach((u) => {
+        if (u.roomId.includes(roomId) && u.ws.readyState === WebSocket.OPEN) {
+          u.ws.send(
+            JSON.stringify({
+              type: "chat",
+              message,
+              roomId,
+              userId: currentUser.userId,
+              username: currentUser.username,
+            })
+          );
+          console.log("message sent to user", u.userId, "room", roomId);
+        }
+      });
+    }
+  });
 })

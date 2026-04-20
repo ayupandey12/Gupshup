@@ -139,7 +139,7 @@ app.get('/chat/:roomId',async(req,res)=>{
                 roomId:roomId
             },
             orderBy:{
-                id:"desc"
+                id:"asc"
             },
             take:50,
             include: {
