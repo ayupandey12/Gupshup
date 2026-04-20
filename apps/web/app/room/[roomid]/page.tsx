@@ -97,60 +97,72 @@ const RoomWithId = () => {
 
   if (isValidating) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-lg animate-pulse font-semibold text-gray-500">Entering Room...</div>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <div className="rounded-3xl border border-slate-200 bg-white px-8 py-10 text-center shadow-[0_25px_80px_rgba(15,23,42,0.08)]">
+          <div className="text-sm uppercase tracking-[0.28em] text-slate-400">Loading room</div>
+          <h1 className="mt-4 text-3xl font-semibold text-slate-950">Entering Room #{roomId}</h1>
+          <p className="mt-3 text-sm text-slate-600">Hang tight while we fetch your chat history.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto flex flex-col h-screen border-x bg-white">
-      <header className="p-4 border-b flex justify-between items-center bg-white shadow-sm">
-        <h1 className="text-xl font-bold">Room #{roomId}</h1>
-        <button 
-          onClick={() => router.push(`/dashboard/${username}`)}
-          className="text-sm font-medium text-blue-600 hover:underline"
-        >
-          Back
-        </button>
-      </header>
+    <div className="min-h-screen bg-slate-50 px-4 py-6">
+      <div className="mx-auto flex h-[calc(100vh-3rem)] max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_35px_90px_rgba(15,23,42,0.08)]">
+        <header className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 px-6 py-5 text-white">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Chat room</p>
+            <h1 className="mt-2 text-2xl font-semibold">Room #{roomId}</h1>
+          </div>
+          <button
+            onClick={() => router.push(`/dashboard/${username}`)}
+            className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium transition hover:bg-white/20"
+          >
+            Back to dashboard
+          </button>
+        </header>
 
-      <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3">
-        {/* 🔥 FIX: Only render Pre50 once the promise exists */}
-        <Suspense fallback={<p className="text-center text-gray-400 text-xs py-4">Loading history...</p>}>
-           {historyPromise && <Pre50 messagePromise={historyPromise} />}
-        </Suspense>
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="mx-auto w-full max-w-3xl space-y-3">
+            <Suspense fallback={<div className="rounded-3xl border border-dashed border-slate-300 bg-white/70 p-6 text-center text-sm text-slate-500">Loading history…</div>}>
+              {historyPromise && <Pre50 messagePromise={historyPromise} />}
+            </Suspense>
 
-        {messages.map((msg, index) => {
-          const isMe = msg.userId === username;
-          return (
-            <div key={`live-${index}`} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-              <div className={`p-3 rounded-lg shadow-sm border max-w-[85%] ${isMe ? 'bg-blue-600 text-white' : 'bg-white'}`}>
-                <span className={`text-[10px] uppercase font-black mb-1 block ${isMe ? 'text-blue-200' : 'text-gray-400'}`}>
-                  {isMe ? "You" : `User ${msg.userId?.slice(-4) || '??'}`}
-                </span>
-                <p>{msg.message}</p>
-              </div>
-            </div>
-          );
-        })}
+            {messages.map((msg, index) => {
+              const isMe = msg.userId === username;
+              return (
+                <div key={`live-${index}`} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] rounded-[1.75rem] border px-5 py-4 shadow-sm ${isMe ? 'bg-slate-950 text-white border-slate-900' : 'bg-slate-100 text-slate-900 border-slate-200'}`}>
+                    <span className={`block text-[10px] uppercase tracking-[0.24em] ${isMe ? 'text-slate-400' : 'text-slate-500'}`}>
+                      {isMe ? 'You' : msg.username || `User ${msg.userId?.slice(-4) || '??'}`}
+                    </span>
+                    <p className="mt-2 text-sm leading-6">{msg.message}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <form className="border-t border-slate-200 bg-slate-50 px-6 py-5" onSubmit={handleSendMessage}>
+          <div className="mx-auto flex max-w-5xl gap-3 rounded-full bg-white p-3 shadow-inner shadow-slate-200/70">
+            <input
+              type="text"
+              value={sendmessage}
+              onChange={(e) => setsendmessage(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-amber-200"
+            />
+            <button
+              type="submit"
+              className="rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Send
+            </button>
+          </div>
+        </form>
       </div>
-
-      <form className="p-4 border-t flex gap-2 bg-white" onSubmit={handleSendMessage}>
-        <input
-          type="text"
-          value={sendmessage}
-          onChange={(e) => setsendmessage(e.target.value)}
-          placeholder="Message room..."
-          className="flex-1 border p-2 px-4 rounded-full bg-gray-100 outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-5 py-2 rounded-full font-bold"
-        >
-          Send
-        </button>
-      </form>
     </div>
   );
 };

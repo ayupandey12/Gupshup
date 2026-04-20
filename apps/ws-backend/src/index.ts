@@ -4,9 +4,9 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/common-jwtsecret/index"
 import { prisma } from "@repo/db";
 console.log(process.env.DATABASE_URL);
-function getuser(token:string):string|null{
+async function getuser(token:string):Promise<{userId:string, username:string}|null>{
  try {
-  const decode =jwt.verify(token,JWT_SECRET)
+  const decode =jwt.verify(token,JWT_SECRET) as JwtPayload
    if(typeof(decode)==="string")
    { 
     return null ;
@@ -16,7 +16,12 @@ function getuser(token:string):string|null{
   { 
     return null;
   }
-  return decode.userId
+  const user = await prisma.user.findUnique({
+    where: { id: decode.userId },
+    select: { name: true }
+  });
+  if (!user) return null;
+  return {userId: decode.userId, username: user.name};
  } catch (error) {
   return null
  }
@@ -24,7 +29,8 @@ function getuser(token:string):string|null{
 type User={
   ws:WebSocket,
   roomId:number[],
-  userId:string
+  userId:string,
+  username:string
 }
 const user:User[]=[];
 const wss=new WebSocketServer({port:8080},()=>{console.log("ws server created")})
@@ -33,8 +39,8 @@ wss.on("connection",async(ws,request)=>{
   const url=request.url
   const query=new URLSearchParams(url?.split("?")[1])
   const token=query.get("token")||""
-  const userId=getuser(token)
-  if(!userId)
+  const userData=await getuser(token)
+  if(!userData)
   {
     ws.close();
     return;
@@ -42,7 +48,8 @@ wss.on("connection",async(ws,request)=>{
   user.push({
     ws:ws,
     roomId:[],
-    userId:userId
+    userId:userData.userId,
+    username:userData.username
   })
     
   ws.on("close", () => {
@@ -72,11 +79,13 @@ wss.on("connection",async(ws,request)=>{
       {
          const roomId =parsedata.roomId;
          const message=parsedata.message;
+         const user2 = user.find(x => x.ws === ws);
+         if (!user2) return;
          await prisma.messages.create({ //idealy use queue
           data:{
             message:message,
             roomId:roomId,
-            userId:userId
+            userId:user2.userId
           }
          })
          user.forEach(u=>{
@@ -85,7 +94,9 @@ wss.on("connection",async(ws,request)=>{
             u.ws.send(JSON.stringify({ //you can send  data in string form
               type:"chat",
               message:message,
-              roomId:roomId
+              roomId:roomId,
+              userId: user2.userId,
+              username: user2.username
             }));
             console.log("message sent to user",u.userId)
           }

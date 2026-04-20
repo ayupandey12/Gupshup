@@ -24,7 +24,7 @@ export const Pre50 = ({ messagePromise }: { messagePromise: Promise<any[]> }) =>
                         <div className={`p-3 rounded-2xl shadow-sm border max-w-[85%] 
                             ${isMe ? 'bg-blue-600 text-white border-blue-700 rounded-tr-none' : 'bg-white text-gray-800 border-gray-200 rounded-tl-none'}`}>
                             <span className={`text-[10px] uppercase font-black mb-1 block ${isMe ? 'text-blue-200' : 'text-gray-400'}`}>
-                                {isMe ? 'You' : `User ${msg.userId?.slice(-4)}`}
+                                {isMe ? 'You' : msg.user?.username || `User ${msg.userId?.slice(-4)}`}
                             </span>
                             <p className="text-sm leading-tight">{msg.message}</p>
                         </div>

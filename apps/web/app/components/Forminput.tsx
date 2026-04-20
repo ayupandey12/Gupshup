@@ -1,9 +1,8 @@
 "use client"
-import { Eye, EyeOff } from "lucide-react"; 
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Formbutton } from "./Formbutton";
-import { SERVER_PROPS_EXPORT_ERROR } from "next/dist/lib/constants";
 
 
 export const Forminput = ({ type }: { type: "signin" | "signup" }) => {
@@ -11,42 +10,38 @@ export const Forminput = ({ type }: { type: "signin" | "signup" }) => {
     const router=useRouter()
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-4 font-sans">
+        <div className="min-h-screen w-full bg-[#f5ede4] flex items-center justify-center p-4 font-sans">
            
-            <div className="w-full max-w-85 bg-white rounded-4xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col border border-gray-100">
+            <div className="w-full max-w-lg overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white shadow-[0_40px_80px_rgba(15,23,42,0.08)]">
                 
                 
-                <div className="relative h-40 bg-black flex items-center justify-center overflow-hidden">
-                    
-                    <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com')]"></div>
-                    
-                  
-                    <div className="z-10 bg-white p-3 rounded-xl shadow-lg">
-                        <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
-                            <div className="w-2 h-2 bg-white rounded-sm rotate-45"></div>
-                        </div>
+                <div className="bg-[#fff7ed] px-8 py-9 text-center">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[1.75rem] bg-[#f9e5cc] text-slate-900 shadow-sm">
+                        <span className="text-xl font-black">C</span>
                     </div>
-
-                    
-                    <div className="absolute -bottom-1 w-full h-10 bg-white rounded-t-[2.5rem]"></div>
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-950">
+                        {type === "signin" ? "Welcome back" : "Create an account"}
+                    </h1>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">
+                        {type === "signin"
+                            ? "Sign in to continue chatting with your rooms."
+                            : "Start your Chatty Charm experience with a simple signup."}
+                    </p>
                 </div>
 
-                
-                <div className="px-8 pb-8 flex flex-col">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center tracking-tight">
-                        {type === "signin" ? "Login" : "Sign Up"}
-                    </h1>
-                    
-                   
-                    <Formbutton type={type}/>
+                <div className="px-8 py-9">
+                    <Formbutton type={type} />
 
-                    <div className="mt-6 text-center">
-                        <button className="text-[12px] font-medium text-gray-500 hover:text-black transition-colors group">
-                            {type === "signin" ? 
-                                <>Don't have an account? <span onClick={()=>{router.push('/signup')}} className="font-bold text-black border-b border-black ml-1">Sign Up</span></> : 
-                                <>Already have an account? <span onClick={()=>{router.push('/signin')}} className="font-bold text-black border-b border-black ml-1 text-xs">Sign In</span></>
-                            }
-                        </button>
+                    <div className="mt-6 text-center text-sm text-slate-600">
+                        {type === "signin" ? (
+                            <button className="font-semibold text-slate-900 hover:text-slate-700" onClick={() => router.push('/signup')}>
+                                Don’t have an account? Sign Up
+                            </button>
+                        ) : (
+                            <button className="font-semibold text-slate-900 hover:text-slate-700" onClick={() => router.push('/signin')}>
+                                Already have an account? Sign In
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -65,8 +60,8 @@ export const Inputbox = ({ type, placeholder, onchange, title, value,onclick }: 
     const inputType = type === "password" && showPassword ? "text" : type;
 
     return (
-        <div className="w-full mb-3 group">
-            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5 ml-1">
+        <div className="w-full mb-4 group">
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-[0.35em] mb-2">
                 {title}
             </label>
             <div className="relative">
@@ -79,7 +74,7 @@ export const Inputbox = ({ type, placeholder, onchange, title, value,onclick }: 
                         const val = e.target.value;
                         onchange(type === "text" ? val.replace(/[^a-zA-Z]/g, "") : val);
                     }} 
-                    className="w-full px-1 py-1.5 bg-transparent border-b border-gray-200 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:border-black transition-colors duration-300 pr-8"
+                    className="w-full rounded-3xl border border-slate-200 bg-[#fbf5ed] px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-200 transition"
                 />
                 
                 {/* Show toggle button only for password fields */}

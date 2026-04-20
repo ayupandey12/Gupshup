@@ -141,7 +141,14 @@ app.get('/chat/:roomId',async(req,res)=>{
             orderBy:{
                 id:"desc"
             },
-            take:50
+            take:50,
+            include: {
+                user: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
          })
          res.status(200).json({ messages: chat });
          return;

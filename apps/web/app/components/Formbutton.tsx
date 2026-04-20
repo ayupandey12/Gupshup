@@ -12,21 +12,18 @@ const SubmitButton = ({ type }: { type: "signin" | "signup" }) => {
     const { pending } = useFormStatus();
 
     return (
-        <button 
-            type="submit" 
+        <button
+            type="submit"
             disabled={pending}
-            className={`w-full mt-6 py-3.5 flex items-center justify-center gap-2 text-sm font-bold rounded-xl transition-all shadow-md active:scale-95 
-                ${pending 
-                    ? "bg-gray-400 cursor-not-allowed text-white" 
-                    : "bg-black hover:bg-gray-800 text-white"}`}
+            className={`w-full mt-6 rounded-full px-5 py-4 text-sm font-semibold uppercase tracking-[0.08em] transition-all duration-200 ${pending ? 'bg-slate-300 cursor-not-allowed text-slate-600' : 'bg-slate-950 text-white shadow-[0_20px_50px_rgba(15,23,42,0.18)] hover:bg-slate-800'}`}
         >
             {pending ? (
-                <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="inline-flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                     Processing...
-                </>
+                </div>
             ) : (
-                type === "signin" ? "Login" : "Sign Up"
+                type === "signin" ? "Sign in" : "Create account"
             )}
         </button>
     );
