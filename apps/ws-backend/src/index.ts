@@ -26,75 +26,87 @@ async function getuser(token:string):Promise<{userId:string, username:string}|nu
   return null
  }
 }
-type User={
-  ws:WebSocket,
-  roomId:number[],
-  userId:string,
-  username:string
-}
-const user:User[]=[];
-const wss=new WebSocketServer({port:8080},()=>{console.log("ws server created")})
-wss.on("connection",async(ws,request)=>{
-   ws.on("error",console.error);
-  const url=request.url
-  const query=new URLSearchParams(url?.split("?")[1])
-  const token=query.get("token")||""
-  const userData=await getuser(token)
-  if(!userData)
-  {
+type User = {
+  ws: WebSocket;
+  roomIds: number[];
+  userId: string;
+  username: string;
+};
+
+const users: User[] = [];
+const wss = new WebSocketServer({ port: 8080 }, () => {
+  console.log("ws server created");
+});
+
+wss.on("connection", async (ws, request) => {
+  ws.on("error", console.error);
+  const url = request.url;
+  const query = new URLSearchParams(url?.split("?")[1]);
+  const token = query.get("token") || "";
+  const userData = await getuser(token);
+  if (!userData) {
     ws.close();
     return;
   }
-  user.push({
-    ws:ws,
-    roomId:[],
-    userId:userData.userId,
-    username:userData.username
-  })
-    
+
+  const currentUser: User = {
+    ws,
+    roomIds: [],
+    userId: userData.userId,
+    username: userData.username,
+  };
+  users.push(currentUser);
+
   ws.on("close", () => {
-    const index = user.findIndex(u => u.ws === ws);
+    const index = users.findIndex((u) => u.ws === ws);
     if (index !== -1) {
-      user.splice(index, 1);
-      console.log("User disconnected and removed from global state");
+      users.splice(index, 1);
+      console.log("User disconnected and removed from global state", currentUser.userId);
     }
   });
 
   ws.on("message", async (data) => {
-    const raw = typeof data === "string" ? data : data.toString();
-    const parsedata = JSON.parse(raw);
+    let raw = "";
+    try {
+      raw = typeof data === "string" ? data : data.toString();
+    } catch (err) {
+      return;
+    }
+
+    let parsedata: any;
+    try {
+      parsedata = JSON.parse(raw);
+    } catch (err) {
+      return;
+    }
+
     const roomId = Number(parsedata.roomId);
     if (!Number.isInteger(roomId)) {
       return;
     }
 
-    const currentUser = user.find((x) => x.ws === ws);
-    if (!currentUser) {
-      return;
-    }
-
     if (parsedata.type === "join_room") {
-      if (!currentUser.roomId.includes(roomId)) {
-        currentUser.roomId.push(roomId);
+      if (!currentUser.roomIds.includes(roomId)) {
+        currentUser.roomIds.push(roomId);
       }
       console.log("user joined room", currentUser.userId, roomId);
       return;
     }
 
     if (parsedata.type === "leave_room") {
-      currentUser.roomId = currentUser.roomId.filter((x) => x !== roomId);
+      currentUser.roomIds = currentUser.roomIds.filter((id) => id !== roomId);
       console.log("user left room", currentUser.userId, roomId);
       return;
     }
 
     if (parsedata.type === "chat") {
-      const message = String(parsedata.message ?? "");
-      if (!message.trim()) {
+      const message = String(parsedata.message ?? "").trim();
+      if (!message) {
         return;
       }
 
-      if (!currentUser.roomId.includes(roomId)) {
-        currentUser.roomId.push(roomId);
+      if (!currentUser.roomIds.includes(roomId)) {
+        currentUser.roomIds.push(roomId);
         console.log("auto-joined user to room on chat", currentUser.userId, roomId);
       }
 
@@ -106,8 +118,8 @@ wss.on("connection",async(ws,request)=>{
         },
       });
 
-      user.forEach((u) => {
-        if (u.roomId.includes(roomId) && u.ws.readyState === WebSocket.OPEN) {
+      users.forEach((u) => {
+        if (u.roomIds.includes(roomId) && u.ws.readyState === WebSocket.OPEN) {
           u.ws.send(
             JSON.stringify({
               type: "chat",
@@ -122,4 +134,4 @@ wss.on("connection",async(ws,request)=>{
       });
     }
   });
-})
+});
