@@ -45,6 +45,7 @@ wss.on("connection", async (ws, request) => {
   const token = query.get("token") || "";
   const userData = await getuser(token);
   if (!userData) {
+    console.warn("Connection rejected: invalid token");
     ws.close();
     return;
   }
@@ -56,12 +57,16 @@ wss.on("connection", async (ws, request) => {
     username: userData.username,
   };
   users.push(currentUser);
+  
+  console.log(`\n✅ NEW CONNECTION: User ${currentUser.username} (${currentUser.userId})`);
+  console.log(`📊 Total connected users: ${users.length}`);
 
   ws.on("close", () => {
     const index = users.findIndex((u) => u.ws === ws);
     if (index !== -1) {
       users.splice(index, 1);
-      console.log("User disconnected and removed from global state", currentUser.userId);
+      console.log(`\n❌ DISCONNECTION: User ${currentUser.username} (${currentUser.userId})`);
+      console.log(`📊 Remaining connected users: ${users.length}`);
     }
   });
 
@@ -70,6 +75,7 @@ wss.on("connection", async (ws, request) => {
     try {
       raw = typeof data === "string" ? data : data.toString();
     } catch (err) {
+      console.error("Error converting data to string:", err);
       return;
     }
 
@@ -77,11 +83,15 @@ wss.on("connection", async (ws, request) => {
     try {
       parsedata = JSON.parse(raw);
     } catch (err) {
+      console.error("Error parsing JSON:", err, "raw:", raw);
       return;
     }
 
+    console.log("Message received from", currentUser.userId, "type:", parsedata.type, "data:", parsedata);
+
     const roomId = Number(parsedata.roomId);
     if (!Number.isInteger(roomId)) {
+      console.error("Invalid roomId:", parsedata.roomId, "parsed:", roomId);
       return;
     }
 
@@ -89,25 +99,26 @@ wss.on("connection", async (ws, request) => {
       if (!currentUser.roomIds.includes(roomId)) {
         currentUser.roomIds.push(roomId);
       }
-      console.log("user joined room", currentUser.userId, roomId);
+      console.log("✅ user joined room", currentUser.userId, "roomIds:", currentUser.roomIds);
       return;
     }
 
     if (parsedata.type === "leave_room") {
       currentUser.roomIds = currentUser.roomIds.filter((id) => id !== roomId);
-      console.log("user left room", currentUser.userId, roomId);
+      console.log("✅ user left room", currentUser.userId, "roomIds:", currentUser.roomIds);
       return;
     }
 
     if (parsedata.type === "chat") {
       const message = String(parsedata.message ?? "").trim();
       if (!message) {
+        console.warn("Empty message received");
         return;
       }
 
       if (!currentUser.roomIds.includes(roomId)) {
         currentUser.roomIds.push(roomId);
-        console.log("auto-joined user to room on chat", currentUser.userId, roomId);
+        console.log("⚠️ auto-joined user to room on chat", currentUser.userId, roomId);
       }
 
       await prisma.messages.create({
@@ -118,8 +129,16 @@ wss.on("connection", async (ws, request) => {
         },
       });
 
+      console.log(`📢 Broadcasting to room ${roomId}. Total users: ${users.length}`);
+      console.log(`Total users in system:`, users.map(u => ({ userId: u.userId, roomIds: u.roomIds })));
+
+      let broadcastCount = 0;
       users.forEach((u) => {
-        if (u.roomIds.includes(roomId) && u.ws.readyState === WebSocket.OPEN) {
+        const isInRoom = u.roomIds.includes(roomId);
+        const wsOpen = u.ws.readyState === WebSocket.OPEN;
+        console.log(`  User ${u.userId} - inRoom: ${isInRoom}, wsOpen: ${wsOpen}, roomIds: ${u.roomIds.join(",")}`);
+        
+        if (isInRoom && wsOpen) {
           u.ws.send(
             JSON.stringify({
               type: "chat",
@@ -129,9 +148,11 @@ wss.on("connection", async (ws, request) => {
               username: currentUser.username,
             })
           );
-          console.log("message sent to user", u.userId, "room", roomId);
+          broadcastCount++;
+          console.log(`  ✉️ message sent to user ${u.userId}`);
         }
       });
+      console.log(`📊 Broadcasted to ${broadcastCount} users in room ${roomId}`);
     }
   });
 });
