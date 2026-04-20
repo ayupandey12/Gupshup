@@ -8,8 +8,7 @@ const dashboard=()=>{
   return (<>
        <Loggedingprovider>
     <div>
-      {/* <Roomssection/> */}
-      <Roomssection/>
+      <Roomssection/> 
     </div>
     <div>
       <Createroomsection/>
@@ -17,8 +16,8 @@ const dashboard=()=>{
     <div>
       <Joinroomsection/>
     </div>
-       </Loggedingprovider>
-    
+      </Loggedingprovider> 
+      
   </>
   )
 }

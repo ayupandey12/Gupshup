@@ -143,7 +143,7 @@ app.get('/chat/:roomId',async(req,res)=>{
             },
             take:50
          })
-         res.status(200).json(chat);
+         res.status(200).json({ messages: chat });
          return;
      } catch (error) {
          res.status(411).json({mess:"no room with this room id"})
