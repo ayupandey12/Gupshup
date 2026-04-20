@@ -43,6 +43,7 @@ wss.on("connection", async (ws, request) => {
   const url = request.url;
   const query = new URLSearchParams(url?.split("?")[1]);
   const token = query.get("token") || "";
+  const initialRoomId = Number(query.get("roomId"));
   const userData = await getuser(token);
   if (!userData) {
     console.warn("Connection rejected: invalid token");
@@ -52,11 +53,14 @@ wss.on("connection", async (ws, request) => {
 
   const currentUser: User = {
     ws,
-    roomIds: [],
+    roomIds: Number.isInteger(initialRoomId) ? [initialRoomId] : [],
     userId: userData.userId,
     username: userData.username,
   };
   users.push(currentUser);
+  if (Number.isInteger(initialRoomId)) {
+    console.log("user auto-joined room from URL", currentUser.userId, initialRoomId);
+  }
   
   console.log(`\n✅ NEW CONNECTION: User ${currentUser.username} (${currentUser.userId})`);
   console.log(`📊 Total connected users: ${users.length}`);

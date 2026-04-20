@@ -49,16 +49,29 @@ const RoomWithId = () => {
   useEffect(() => {
     if (isValidating || !token || isNaN(roomId)) return;
 
-    const ws = new WebSocket(`ws://localhost:8080?token=${token}`);
+    const ws = new WebSocket(`ws://localhost:8080?token=${token}&roomId=${roomId}`);
     socketRef.current = ws;
 
+    const joinRoom = () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        console.log("WS: sending join_room", roomId);
+        ws.send(JSON.stringify({ type: "join_room", roomId }));
+      }
+    };
+
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: "join_room", roomId }));
+      console.log("WS: connected, room", roomId);
+      joinRoom();
+    };
+
+    ws.onerror = (event) => {
+      console.error("WS error:", event);
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log("WS message received:", data);
         if (data.type === "chat") {
           setMessages((prev) => [...prev, data]);
         }
@@ -67,8 +80,13 @@ const RoomWithId = () => {
       }
     };
 
+    if (ws.readyState === WebSocket.OPEN) {
+      joinRoom();
+    }
+
     return () => {
       if (ws.readyState === WebSocket.OPEN) {
+        console.log("WS: sending leave_room", roomId);
         ws.send(JSON.stringify({ type: "leave_room", roomId }));
       }
       ws.close();
