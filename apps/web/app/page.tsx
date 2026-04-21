@@ -63,7 +63,7 @@ export default function HomePage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-500">Active Chat</p>
-                                        <h3 className="mt-3 text-xl font-bold text-slate-950">Chatty Charm</h3>
+                                        <h3 className="mt-3 text-xl font-bold text-slate-950">Gupshup</h3>
                                     </div>
                                     <div className="h-10 w-10 rounded-2xl bg-amber-100" />
                                 </div>

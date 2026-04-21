@@ -28,9 +28,9 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-12">
         <Link href="/" className="inline-flex items-center gap-3 text-lg font-black tracking-tight text-slate-950">
           <span className="inline-flex h-10 w-10 items-center justify-center rounded-3xl bg-[#fde7c8] text-slate-900 shadow-sm">
-            C
+            G
           </span>
-          Chatty Charm
+          Gupshup
         </Link>
 
         <div className="hidden items-center gap-6 text-sm font-medium text-slate-700 md:flex">
