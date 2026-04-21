@@ -62,15 +62,15 @@ wss.on("connection", async (ws, request) => {
     console.log("user auto-joined room from URL", currentUser.userId, initialRoomId);
   }
   
-  console.log(`\n✅ NEW CONNECTION: User ${currentUser.username} (${currentUser.userId})`);
-  console.log(`📊 Total connected users: ${users.length}`);
+  console.log(`NEW CONNECTION: User ${currentUser.username} (${currentUser.userId})`);
+  console.log(` Total connected users: ${users.length}`);
 
   ws.on("close", () => {
     const index = users.findIndex((u) => u.ws === ws);
     if (index !== -1) {
       users.splice(index, 1);
-      console.log(`\n❌ DISCONNECTION: User ${currentUser.username} (${currentUser.userId})`);
-      console.log(`📊 Remaining connected users: ${users.length}`);
+      console.log(` DISCONNECTION: User ${currentUser.username} (${currentUser.userId})`);
+      console.log(` Remaining connected users: ${users.length}`);
     }
   });
 
@@ -103,13 +103,13 @@ wss.on("connection", async (ws, request) => {
       if (!currentUser.roomIds.includes(roomId)) {
         currentUser.roomIds.push(roomId);
       }
-      console.log("✅ user joined room", currentUser.userId, "roomIds:", currentUser.roomIds);
+      console.log("user joined room", currentUser.userId, "roomIds:", currentUser.roomIds);
       return;
     }
 
     if (parsedata.type === "leave_room") {
       currentUser.roomIds = currentUser.roomIds.filter((id) => id !== roomId);
-      console.log("✅ user left room", currentUser.userId, "roomIds:", currentUser.roomIds);
+      console.log("user left room", currentUser.userId, "roomIds:", currentUser.roomIds);
       return;
     }
 
@@ -122,7 +122,7 @@ wss.on("connection", async (ws, request) => {
 
       if (!currentUser.roomIds.includes(roomId)) {
         currentUser.roomIds.push(roomId);
-        console.log("⚠️ auto-joined user to room on chat", currentUser.userId, roomId);
+        console.log("auto-joined user to room on chat", currentUser.userId, roomId);
       }
 
       await prisma.messages.create({
@@ -133,7 +133,7 @@ wss.on("connection", async (ws, request) => {
         },
       });
 
-      console.log(`📢 Broadcasting to room ${roomId}. Total users: ${users.length}`);
+      console.log(` Broadcasting to room ${roomId}. Total users: ${users.length}`);
       console.log(`Total users in system:`, users.map(u => ({ userId: u.userId, roomIds: u.roomIds })));
 
       let broadcastCount = 0;
@@ -153,10 +153,10 @@ wss.on("connection", async (ws, request) => {
             })
           );
           broadcastCount++;
-          console.log(`  ✉️ message sent to user ${u.userId}`);
+          console.log(`message sent to user ${u.userId}`);
         }
       });
-      console.log(`📊 Broadcasted to ${broadcastCount} users in room ${roomId}`);
+      console.log(`Broadcasted to ${broadcastCount} users in room ${roomId}`);
     }
   });
 });
