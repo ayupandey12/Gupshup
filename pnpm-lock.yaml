@@ -38,6 +38,9 @@ importers:
       cors:
         specifier: ^2.8.6
         version: 2.8.6
+      dotenv:
+        specifier: ^16.0.3
+        version: 16.6.1
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -72,6 +75,9 @@ importers:
       axios:
         specifier: 1.13.5
         version: 1.13.5
+      dotenv:
+        specifier: ^16.0.3
+        version: 16.6.1
       lucide-react:
         specifier: ^0.574.0
         version: 0.574.0(react@19.2.0)
@@ -130,6 +136,9 @@ importers:
       '@types/ws':
         specifier: ^8.18.1
         version: 8.18.1
+      dotenv:
+        specifier: ^16.0.3
+        version: 16.6.1
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
