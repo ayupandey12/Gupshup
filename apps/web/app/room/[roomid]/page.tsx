@@ -8,7 +8,7 @@ import { Pre50 } from "../../components/Pre50";
 
 const RoomWithId = () => {
   const token = useAuthStore((state) => state.token);
-  const username = useAuthStore((state) => state.user?.username);
+  const username = useAuthStore((state) => state.user?.userId);
   const logout = useAuthStore((state) => state.logout);
   const params = useParams();
   const router = useRouter();
@@ -21,10 +21,10 @@ const RoomWithId = () => {
   const [sendmessage, setsendmessage] = useState<string>("");
   const [isValidating, setIsValidating] = useState(true);
   
-  // 🔥 FIX: Use State instead of useMemo to hold the Promise
+  
   const [historyPromise, setHistoryPromise] = useState<Promise<any[]> | null>(null);
 
-  // 1. Validation Logic
+  
   useEffect(() => {
     async function checkRoom() {
       if (!token) { router.push("/signin"); return; }
@@ -35,7 +35,6 @@ const RoomWithId = () => {
           if (username) router.push(`/dashboard/${username}`);
         } else {
           setIsValidating(false);
-          // 🔥 FIX: Trigger the Server Action here, safely after render
           setHistoryPromise(Previous50(roomId));
         }
       } catch (error) {
@@ -45,7 +44,7 @@ const RoomWithId = () => {
     if (username !== undefined) checkRoom();
   }, [roomId, router, token, username]);
 
-  // 2. WebSocket Logic
+  
   useEffect(() => {
     if (isValidating || !token || isNaN(roomId)) return;
 
@@ -94,7 +93,7 @@ const RoomWithId = () => {
     };
   }, [token, roomId, isValidating]);
 
-  // 3. Scroll Logic
+  //Scroll Logic
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -111,17 +110,17 @@ const RoomWithId = () => {
         message: sendmessage,
       };
       socket.send(JSON.stringify(outboundMessage));
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: "chat",
-          roomId,
-          message: sendmessage,
-          userId: username,
-          username: username,
-          pending: true,
-        },
-      ]);
+      // setMessages((prev) => [
+      //   ...prev,
+      //   {
+      //     type: "chat",
+      //     roomId,
+      //     message: sendmessage,
+      //     userId: username,
+      //     username: username,
+      //     pending: true,
+      //   },
+      // ]);
       setsendmessage("");
     }
   };
