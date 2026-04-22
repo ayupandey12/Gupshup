@@ -3,6 +3,8 @@ import { WebSocket, WebSocketServer } from "ws";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/common-jwtsecret/index"
 import { prisma } from "@repo/db";
+import https from "https";
+import http from "http"; // Add this import
 console.log(process.env.DATABASE_URL);
 async function getuser(token:string):Promise<{userId:string, username:string}|null>{
  try {
@@ -34,9 +36,48 @@ type User = {
 };
 
 const users: User[] = [];
-const wss = new WebSocketServer({ port: 8080 }, () => {
-  console.log("ws server created");
+// const wss = new WebSocketServer({ port: 8080 }, () => {
+//   console.log("ws server created");
+// });
+
+
+
+// ... your existing imports and getuser function ...
+
+// 1. Change the port to use Render's dynamic port
+const PORT = process.env.PORT || 8080;
+
+// 2. Create a standard HTTP server
+const server = http.createServer((req, res) => {
+  if (req.url === "/ping") {
+    res.writeHead(200);
+    res.end("pong"); // This keeps Render awake!
+    return;
+  }
+  res.writeHead(404);
+  res.end();
 });
+
+// 3. Attach WebSocketServer to that HTTP server
+const wss = new WebSocketServer({ server });
+
+server.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
+});
+
+// 4. ADD THE PINGER LOGIC HERE
+
+const SELF_URL = process.env.SELF_URL||""; // Replace with your actual Render URL
+
+setInterval(() => {
+  https.get(`${SELF_URL}/ping`, (res) => {
+    console.log(`Self-ping status: ${res.statusCode}`);
+  }).on('error', (err) => {
+    console.error('Self-ping failed:', err.message);
+  });
+}, 600000); // 10 minutes
+
+// ... the rest of your wss.on("connection", ...) code remains the same ...
 
 wss.on("connection", async (ws, request) => {
   ws.on("error", console.error);
