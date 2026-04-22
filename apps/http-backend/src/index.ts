@@ -184,4 +184,6 @@ app.get('/isloggedin',(req,res)=>{
         }
         res.json({decode});
 })
-app.listen(3010)
+app.listen(3010,()=>{
+    console.log("server is running on port 3010")
+})
