@@ -6,13 +6,30 @@ import { middleware } from "./middleware";
 import { prisma } from "@repo/db";
 import { JWT_SECRET } from "@repo/common-jwtsecret/index";
 import cors from "cors"
-console.log(process.env.DATABASE_URL)
+import https from "https"; // 1. Import https for the pinger
 
+console.log(process.env.DATABASE_URL)
 
 const app=express();
 app.use(cors({origin:"*"}));
 app.use(express.json());
-app.use(express.json());
+
+// 2. Health check route for Render
+app.get("/ping", (req, res) => {
+    res.send("pong");
+});
+
+// 3. Self-Pinger Logic
+const SELF_URL = process.env.SELF_URL || "";
+if (SELF_URL) {
+  setInterval(() => {
+    https.get(`${SELF_URL}/ping`, (res) => {
+      console.log(`HTTP Self-ping status: ${res.statusCode}`);
+    }).on('error', (err) => {
+      console.error('HTTP Self-ping failed:', err.message);
+    });
+  }, 600000); // 10 minutes
+}
 app.get("/",async (req,res)=>{
      const user=await prisma.user.findMany({});
     console.log(user);
@@ -184,6 +201,7 @@ app.get('/isloggedin',(req,res)=>{
         }
         res.json({decode});
 })
-app.listen(3010,()=>{
-    console.log("server is running on port 3010")
-})
+const PORT = process.env.PORT || 3010;
+app.listen(PORT, () => {
+    console.log(`server is running on port ${PORT}`)
+});
