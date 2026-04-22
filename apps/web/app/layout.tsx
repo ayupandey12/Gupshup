@@ -12,7 +12,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Chatty Charm",
+  title: "Gupshup - A Modern Chat App",
   description: "A modern chat app experience built with Next.js",
 };
 
