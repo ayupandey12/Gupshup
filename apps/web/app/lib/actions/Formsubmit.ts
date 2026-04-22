@@ -2,7 +2,6 @@
 import axios from "axios"
 import "dotenv/config"
 export async function Formsubmitaction({ type,name,email,password }: { type: "signin" | "signup",name:string,email:string,password:string }) {
-    console.log(`${process.env.NEXT_PUBLIC_HTTP_URL}/${type}`)
    try {
      const user1=await axios.post(`${process.env.NEXT_PUBLIC_HTTP_URL}/${type}`,{name,email,password})
       const message=user1.data.mess;

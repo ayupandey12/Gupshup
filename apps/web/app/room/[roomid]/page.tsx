@@ -71,7 +71,7 @@ const RoomWithId = () => {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log("WS message received:", data);
+        console.log("WS message received:");
         if (data.type === "chat") {
           setMessages((prev) => [...prev, data]);
         }

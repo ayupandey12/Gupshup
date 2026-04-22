@@ -25,7 +25,6 @@ export const useAuthStore = create<AuthState>()(
 
       checkAuth: async () => {
         const token = get().token;
-        console.log(token);
         if (!token) {
           set({ user: null, isInitialized: true });
           return;
