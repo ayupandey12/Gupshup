@@ -1,4 +1,5 @@
 "use client";
+import "dotenv/config"
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useAuthStore } from "../../lib/store/useAuthStore";
 import { useParams, useRouter } from "next/navigation";
@@ -48,7 +49,7 @@ const RoomWithId = () => {
   useEffect(() => {
     if (isValidating || !token || isNaN(roomId)) return;
 
-    const ws = new WebSocket(`ws://localhost:8080?token=${token}&roomId=${roomId}`);
+    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}?token=${token}&roomId=${roomId}`);
     socketRef.current = ws;
 
     const joinRoom = () => {
