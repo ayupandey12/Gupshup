@@ -1,13 +1,26 @@
 "use client"
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthHydrated } from "../lib/store/useAuthhydration";
-import { redirect } from "next/navigation";
 export const Loggedingprovider = ({ children }: { children: React.ReactNode }) => {
+    const router = useRouter();
     const { user, isInitialized, checkAuth } = useAuthHydrated();
 
     useEffect(() => {
         checkAuth();
     }, [checkAuth]);
+
+    useEffect(() => {
+        if (isInitialized && !user) {
+            router.push("/signin");
+        }
+    }, [isInitialized, user, router]);
+
+    useEffect(() => {
+        if (user && user.username !== window.location.pathname.split("/")[2]) {
+            router.push("/dashboard/" + user.username);
+        }
+    }, [user, router]);
 
     if (!isInitialized) {
         return (
@@ -21,11 +34,11 @@ export const Loggedingprovider = ({ children }: { children: React.ReactNode }) =
     }
 
     if (!user) {
-        redirect("/signin");
+        return null; // Will redirect via useEffect
     }
 
     if (user.username !== window.location.pathname.split("/")[2]) {
-        redirect("/dashboard/" + user.username);
+        return null; // Will redirect via useEffect
     }
 
     return (
