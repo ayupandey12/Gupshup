@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { NextResponse } from "next/server";
 import { prisma } from "@repo/db";
 
